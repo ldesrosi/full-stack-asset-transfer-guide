@@ -10,13 +10,15 @@ import { TextDecoder } from 'util';
 const utf8Decoder = new TextDecoder();
 
 export interface APIRecord {
-    id: string;
+    txid: string;
     host: string;
-    port: number;
+    port: string;
     path: string;
     method: string;
-    header: string;
+    headers: string;
     body: string;
+    statusCode: string;
+    response: string;
 }
 
 
@@ -38,6 +40,14 @@ export class AssetTransfer {
         });
     }
 
+    async updateStatus(asset: APIRecord): Promise<void> {
+        await this.#contract.submit('UpdateStatus', {
+            arguments: [JSON.stringify(asset)],
+        });
+    }
+    
+    
+    
     async getAllAssets(): Promise<APIRecord[]> {
         const result = await this.#contract.evaluate('GetAllAssets');
         if (result.length === 0) {

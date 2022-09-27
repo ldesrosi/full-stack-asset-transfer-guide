@@ -16,19 +16,34 @@ export class AssetTransferContract extends Contract {
      * CreateAsset issues a new asset to the world state with given details.
      */
     @Transaction()
-    @Param('assetObj', 'APIRecord', 'Part formed JSON of an API Record')
+    @Param('state', 'APIRecord', 'Part formed JSON of an API Record')
     async CreateAsset(ctx: Context, state: APIRecord): Promise<void> {
         const asset = APIRecord.newInstance(state);
 
-        const exists = await this.AssetExists(ctx, asset.ID);
+        const exists = await this.AssetExists(ctx, asset.txid);
         if (exists) {
-            throw new Error(`The asset ${asset.ID} already exists`);
+            throw new Error(`The asset ${asset.txid} already exists`);
         }
 
         const assetBytes = marshal(asset);
-        await ctx.stub.putState(asset.ID, assetBytes);
+        await ctx.stub.putState(asset.txid, assetBytes);
 
         ctx.stub.setEvent('CreateAsset', assetBytes);
+    }
+
+    @Transaction()
+    @Param('state', 'APIRecord', 'Part formed JSON of an API Record')
+    async UpdateStatus(ctx: Context, state: APIRecord): Promise<void> {
+        const asset = APIRecord.newInstance(state);
+        console.log("-----" + typeof(asset));
+        if (asset.txid === undefined) {
+            throw new Error('No asset ID specified');
+        }
+
+        await this.#readAsset(ctx, asset.txid);
+
+        const updatedStateBytes = marshal(asset);
+        await ctx.stub.putState(asset.txid, updatedStateBytes);
     }
 
     /**

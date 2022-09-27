@@ -6,20 +6,32 @@ import { Object as DataType, Property } from 'fabric-contract-api';
 
 @DataType()
 export class APIRecord {
-    @Property('ID', 'string')
-    ID = '';
+    @Property('txid', 'string')
+    txid = '';
 
-    @Property('Host', 'string')
-    Host = '';
+    @Property('host', 'string')
+    host = '';
 
-    @Property('Path', 'string')
-    Path = '';
+    @Property('port', 'string')
+    port = '';
 
-    @Property('Header', 'string')
-    Header = 0;
+    @Property('path', 'string')
+    path = '';
 
-    @Property('Body', 'string')
-    Body = 0;
+    @Property('method', 'string')
+    method = '';
+
+    @Property('headers', 'string')
+    headers = '';
+
+    @Property('body', 'string')
+    body = '';
+
+    @Property('statusCode', 'string')
+    statusCode = '';
+
+    @Property('response', 'string')
+    response = '';
 
     constructor() {
         // Nothing to do
@@ -27,11 +39,15 @@ export class APIRecord {
 
     static newInstance(state: Partial<APIRecord> = {}): APIRecord {
         return {
-            ID: assertHasValue(state.ID, 'Missing ID'),
-            Host: assertHasValue(state.Host, 'Missing Host'),
-            Path: assertHasValue(state.Path, 'Missing Path'),
-            Header: state.Header ?? 0,
-            Body: state.Body ?? 0
+            txid: assertHasValue(state.txid, 'Missing txid'),
+            host: assertHasValue(state.host, 'Missing host'),
+            port: assertHasValue(state.port, 'Missing port'),            
+            path: assertHasValue(state.path, 'Missing path'),
+            method: assertHasValue(state.method, 'Missing method'),
+            headers: state.headers ?? '',
+            body: state.body ?? '',
+            statusCode: state.statusCode ?? '',
+            response: state.response ?? ''
         };
     }
 }
