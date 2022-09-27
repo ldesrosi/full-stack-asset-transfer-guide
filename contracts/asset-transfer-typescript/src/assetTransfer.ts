@@ -18,8 +18,8 @@ export class AssetTransferContract extends Contract {
     @Transaction()
     @Param('state', 'APIRecord', 'Part formed JSON of an API Record')
     async CreateAsset(ctx: Context, state: APIRecord): Promise<void> {
+        console.log(JSON.stringify(state));
         const asset = APIRecord.newInstance(state);
-
         const exists = await this.AssetExists(ctx, asset.txid);
         if (exists) {
             throw new Error(`The asset ${asset.txid} already exists`);
