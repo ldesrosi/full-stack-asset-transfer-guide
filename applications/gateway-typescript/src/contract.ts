@@ -10,11 +10,13 @@ import { TextDecoder } from 'util';
 const utf8Decoder = new TextDecoder();
 
 export interface APIRecord {
-    ID: string;
-    Host: string;
-    Path: string;
-    Header: string;
-    Body: string;
+    id: string;
+    host: string;
+    port: number;
+    path: string;
+    method: string;
+    header: string;
+    body: string;
 }
 
 
