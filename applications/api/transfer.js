@@ -14,7 +14,6 @@ router.route('/transfer')
         
         // parse request values
         let body = request.body;
-        let req_header = request.headers;
 
         let envid = request.headers['x-env-id'];
         let currency = request.headers['x-currency-id'];
@@ -32,13 +31,11 @@ router.route('/transfer')
         // if resp.status_code == 201 : payment triggered
 
         // calling API
-        let Host = 'cbdchackathon-dev.barclays.nayaone.com';
         let Header = JSON.stringify({
             "X-API-KEY": process.env.API_KEY,
             'x-currency-id': currency,
             'x-env-id': envid,
-            });
-
+        });
         let Method = 'POST'; 
         let Path = '/domestic-payments';
         let Body = JSON.stringify({
@@ -46,6 +43,7 @@ router.route('/transfer')
             sourceAccountId: sourceAccountId,
             destinationAccountId: destinationAccountId,
         });
+
         // calling ChainCode
         CreateSmartContract(txid, Path, Method, Header, Body);
     });

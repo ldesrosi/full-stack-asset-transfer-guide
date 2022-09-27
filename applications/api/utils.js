@@ -21,6 +21,4 @@ module.exports.CreateSmartContract = function(txid, Path, Method, Header, Body) 
         console.log(`stdout: ${stdout}`);
       });
 
-      
-
 }

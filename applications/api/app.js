@@ -7,7 +7,7 @@ dotenv.config();
 
 
 const app = express()
-const port = 3030
+const port = 3030;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
