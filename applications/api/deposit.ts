@@ -44,11 +44,11 @@ router.post('/deposit', (request, response) => {
   let pipID = body.pip_id;
 
   // calling API
-  let Host = 'https://cbdchackathon-dev.barclays.nayaone.com';
+  let Host = 'cbdchackathon-dev.barclays.nayaone.com';
   let Header = JSON.stringify({
     "X-API-KEY": process.env.API_KEY,
-    'X-CURRENCY_ID': currency,
-    'X-ENV-ID': envid,
+    'x-currency-id': currency,
+    'x-env-id': envid,
     });
   let Method = 'POST';
   let Path = `/pips/${pipID}/accounts/${accountID}/deposit`;
