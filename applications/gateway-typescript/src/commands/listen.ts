@@ -54,39 +54,45 @@ async function onEvent(event: ChaincodeEvent, network: Network): Promise<void> {
         headers['Content-Length'] = Buffer.byteLength(apiDetails.body);
     }
     
-    var options = {
-        host: apiDetails.host,
-        port: parseInt(apiDetails.port),
-        path: apiDetails.path,
-        method: apiDetails.method,
-        headers: headers,
-      };
+    try {
+        var options = {
+            host: apiDetails.host,
+            port: parseInt(apiDetails.port),
+            path: apiDetails.path,
+            method: apiDetails.method,
+            headers: headers,
+        };
 
-    var req = https.request(options, async resp => {
-        console.log(`STATUS: ${resp.statusCode}`);
-        console.log(`HEADERS: ${JSON.stringify(resp.headers)}`);
-        var statusCode = resp.statusCode;
-        var responseData = "";
+        var req = https.request(options, async resp => {
+            console.log(`STATUS: ${resp.statusCode}`);
+            console.log(`HEADERS: ${JSON.stringify(resp.headers)}`);
+            var statusCode = resp.statusCode;
+            var responseData = "";
 
-        resp.setEncoding('utf8');
-        resp.on('data', (chunk) => {
-          console.log(`BODY: ${chunk}`);
-          responseData += chunk;
+            resp.setEncoding('utf8');
+            resp.on('data', (chunk) => {
+                console.log(`BODY: ${chunk}`);
+                responseData += chunk;
+            });
+
+            resp.on('end', async () => {
+                console.log('Updating Transaction Status.');
+                apiDetails.statusCode = (statusCode)?statusCode.toString():'N/A';
+                apiDetails.response = responseData;
+                await updateTransaction(apiDetails, network)
+            });
+
+        }).on('error', (e) => {
+            console.error(e);
         });
 
-        resp.on('end', async () => {
-          console.log('Updating Transaction Status.');
-          apiDetails.statusCode = (statusCode)?statusCode.toString():'N/A';
-          apiDetails.response = responseData;
-          await updateTransaction(apiDetails, network)
-        });
-    });
-
-    if (apiDetails.body) {
-        req.write(apiDetails.body);
+        if (apiDetails.body) {
+            req.write(apiDetails.body);
+        }
+        req.end();
+    } catch(error) {
+        console.log(error);
     }
-    req.end();
-    
 }
 
 async function updateTransaction(apiDetails: APIRecord, network: Network) {
