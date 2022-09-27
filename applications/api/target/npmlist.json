@@ -1,0 +1,1 @@
+{"version":"1.0.0","name":"api","dependencies":{"dotenv":{"version":"16.0.2"},"express":{"version":"4.18.1"},"uuid":{"version":"9.0.0"}}}
