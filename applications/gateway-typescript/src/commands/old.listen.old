@@ -43,21 +43,9 @@ export default async function main(gateway: Gateway): Promise<void> {
 async function onEvent(event: ChaincodeEvent, network: Network): Promise<void> {
     console.log(printable(event));
 
-    if (event.eventName == 'Multiple') {
-        var apiList = parseJSON(utf8Decoder.decode(event.payload));
-        if (!apiList) return;
-        apiList.forEach( (apiDetails: APIRecord) => {
-            processAPI(apiDetails, network);
-        });
+    var apiDetails = parseJSON(utf8Decoder.decode(event.payload));
+    if (!apiDetails) return;
 
-    } else {
-        var apiDetails = parseJSON(utf8Decoder.decode(event.payload));
-        if (!apiDetails) return;
-        processAPI(apiDetails, network);
-    }
-}
-
-async function processAPI(apiDetails: APIRecord, network: Network) {
     var headers = parseJSON(apiDetails.headers);
     if (!headers) return;
 

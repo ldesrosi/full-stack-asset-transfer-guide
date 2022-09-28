@@ -13,8 +13,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 const Deposit = require('./deposit.js');
 const Transfer = require('./transfer.js');
+const Ledger = require('./ledger.js');
 
-app.use('/api', Deposit, Transfer);
+app.use('/api', Deposit, Transfer, Ledger);
 
 app.listen(port, () => console.log(`Running on port ${port}`));
 

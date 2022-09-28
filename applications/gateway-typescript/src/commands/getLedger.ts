@@ -17,8 +17,9 @@ export default async function main(gateway: Gateway): Promise<void> {
 
     const smartContract = new AssetTransfer(contract);
     const assets = await smartContract.getAllAssets();
-
-    const assetsJson = JSON.stringify(assets, undefined, 2);
-    assetsJson.split('\n').forEach(line => console.log(line)); // Write line-by-line to avoid truncation    
+    let finalJson = "";
+    const assetsJson = JSON.stringify(assets);
+    assetsJson.split('\n').forEach(line => finalJson += line); // Write line-by-line to avoid truncation 
+    console.log(finalJson);
 }
 

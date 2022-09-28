@@ -64,5 +64,14 @@ export class AssetTransfer {
         return utf8Decoder.decode(result).toLowerCase() === 'true';
     }
 
+    async getLedger(): Promise<APIRecord[]> {
+        const result = await this.#contract.evaluate('getLedger');
+        if (result.length === 0) {
+            return [];
+        }
+
+        return JSON.parse(utf8Decoder.decode(result)) as APIRecord[];
+    }
+
 }
 

@@ -7,7 +7,6 @@ import stringify from 'json-stringify-deterministic'; // Deterministic JSON.stri
 import sortKeysRecursive from 'sort-keys-recursive';
 import { TextDecoder } from 'util';
 import { APIRecord } from './apiRecord';
-import { Crowdfunding } from './crowdfunding';
 
 const utf8Decoder = new TextDecoder();
 
@@ -19,8 +18,8 @@ export class AssetTransferContract extends Contract {
     @Transaction()
     @Param('state', 'APIRecord', 'Part formed JSON of an API Record')
     async CreateAsset(ctx: Context, state: APIRecord): Promise<void> {
+        console.log(JSON.stringify(state));
         const asset = APIRecord.newInstance(state);
-
         const exists = await this.AssetExists(ctx, asset.txid);
         if (exists) {
             throw new Error(`The asset ${asset.txid} already exists`);
@@ -30,92 +29,6 @@ export class AssetTransferContract extends Contract {
         await ctx.stub.putState(asset.txid, assetBytes);
 
         ctx.stub.setEvent('CreateAsset', assetBytes);
-    }
-
-    async StartCrowdfunding(ctx: Context, state: Crowdfunding): Promise<void> {
-        const asset = Crowdfunding.newInstance(state);
-
-        const exists = await this.AssetExists(ctx, asset.fundingid);
-        if (exists) {
-            throw new Error(`The asset ${asset.fundingid} already exists`);
-        }
-
-        const assetBytes = marshal(asset);
-        const key = ctx.stub.createCompositeKey('Funding',[asset.fundingid]);
-        await ctx.stub.putState(key, assetBytes);
-    }
-
-    async EndCrowdfunding(ctx: Context, fundingid: string): Promise<void> {
-        const key = ctx.stub.createCompositeKey('Funding',[fundingid]);
-
-        const existingAssetBytes = await this.#readAsset(ctx, key);
-        const currentFunding = Crowdfunding.newInstance(unmarshal(existingAssetBytes));
-
-        const paymentList = ctx.stub.getStateByPartialCompositeKey('Payment',[currentFunding.fundingid,'2']);
-        const allEvents = [];
-        for await (const res of paymentList) {
-            allEvents.push(APIRecord.newInstance(unmarshal(res.value)));
-        }
-        const allEventsBytes = marshal(allEvents);
-
-        ctx.stub.setEvent('Multiple', allEventsBytes);
-    }
-
-    async StartPayment(ctx: Context, stateConsent: APIRecord, statePayment: APIRecord, fundingid?: string): Promise<void> {
-        const consent = APIRecord.newInstance(stateConsent);
-        const payment = APIRecord.newInstance(statePayment);
-
-        if (!fundingid) {
-            fundingid='0';
-        }
-
-        const consentKey = ctx.stub.createCompositeKey('Payment',[fundingid,'1',consent.txid]);
-        const paymentKey = ctx.stub.createCompositeKey('Payment',[fundingid,'2',payment.txid]);
-
-        const existsConsent = await this.AssetExists(ctx, consentKey);
-        if (existsConsent) {
-            throw new Error(`The consent key ${consentKey} already exists`);
-        }
-
-
-        const existsPayment = await this.AssetExists(ctx, paymentKey);
-        if (existsPayment) {
-            throw new Error(`The payment key ${paymentKey} already exists`);
-        }
-
-        const consentBytes = marshal(consent);
-        const paymentBytes = marshal(payment);
-
-        await ctx.stub.putState(consentKey, consentBytes);
-        await ctx.stub.putState(paymentKey, paymentBytes);
-
-        ctx.stub.setEvent('GetConsent', consentBytes);
-    }
-
-    async CompletePayment(ctx: Context, txid: string, fundingid?: string): Promise<void> {
-        if (!fundingid) {
-            fundingid='0';
-        }
-        const consentKey = ctx.stub.createCompositeKey('Payment',[fundingid,'1',txid]);
-        const consentBytes = await this.#readAsset(ctx, consentKey);
-        const consentRecord = APIRecord.newInstance(unmarshal(consentBytes));
-
-        if (consentRecord.statusCode == "200") {
-            const paymentKey = ctx.stub.createCompositeKey('Payment',[fundingid,'2',txid]);
-            const paymentBytes = await this.#readAsset(ctx, paymentKey);
-            const paymentRecord = APIRecord.newInstance(unmarshal(paymentBytes));
-            
-            // let consentResponse = JSON.parse(consentRecord.response);
-            
-            // Move consent id to payment record body payload
-            const updatedPaymentBytes = marshal(paymentRecord);
-            await ctx.stub.putState(paymentKey, updatedPaymentBytes);
-
-            ctx.stub.setEvent('CompletePayment', updatedPaymentBytes);
-
-        } else {
-            throw new Error('Consent not yet achieved.');
-        }
     }
 
     @Transaction()
